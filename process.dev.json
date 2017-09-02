@@ -1,0 +1,12 @@
+{
+  "apps": [{
+    "name": "app",
+    "script": "src/server.js",
+    "watch": ["src"],
+    "env": {
+    	"NODE_ENV": "development"
+    },
+    "interpreter": "./node_modules/.bin/babel-node",
+    "exec_mode": "fork"
+  }]
+}
