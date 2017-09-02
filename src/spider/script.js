@@ -5,8 +5,8 @@ const cheerio = require('cheerio');
 // const pg = require('')
 
 const urlLink = 'https://movie.douban.com/celebrity/1054524/';
-const fetchPage = () => {
-  start(urlLink);
+const fetchPage = (url) => {
+  start(url);
 };
 
 const downloadPersonImg = (name, addr) => {
@@ -158,7 +158,4 @@ const start = async (url) => {
   });
 };
 
-// fetchPage(urlLink);
-
-export default { fetchPage };
-
+fetchPage(urlLink);

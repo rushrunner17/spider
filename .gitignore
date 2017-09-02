@@ -11,5 +11,5 @@ coverage
 .vscode
 
 /lib
-data/redis
+src/img
 dbsource/postgres
