@@ -47,9 +47,21 @@ const listAll = async (req, res, next) => {
   next();
 };
 
+const del = async (req, res, next) => {
+  const uid = req.params.uid;
+
+  await queryPg.query(queryPg.SQL`
+    DELETE from characters c where exists
+    (SELECT FROM tests t where t.person_id = c.id and t.uid = ${uid})
+  `);
+  res.json(200, 'ok');
+  next();
+};
+
 const character = {
   addPerson,
-  listAll
+  listAll,
+  del
 };
 
 export default character;
