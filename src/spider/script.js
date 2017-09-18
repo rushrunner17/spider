@@ -2,7 +2,8 @@ const request = require('request');
 const fs = require('fs');
 const http = require('https');
 const cheerio = require('cheerio');
-// const pg = require('')
+const uuid = require('uuid');
+const spg = require('../lib/scriptpg');
 
 const urlLink = 'https://movie.douban.com/celebrity/1054524/';
 
@@ -43,6 +44,11 @@ const getPageInfo = (listUrl, pageParam) => {
           $('#wrapper #content div[class="grid-16-8 clearfix"] .article .grid_view ul li dl dd h6 a')
           .eq(i).text();
 
+          const subjectIdChar =
+          $('#wrapper #content div[class="grid-16-8 clearfix"] .article .grid_view ul li dl dd h6 a')
+          .eq(i).attr('href');
+          const subjectId = subjectIdChar.replace(/\D/g, '');
+
           const year =
           $('#wrapper #content div[class="grid-16-8 clearfix"] .article .grid_view ul li dl dd h6 span')
           .eq(spanTag).text();
@@ -67,7 +73,8 @@ const getPageInfo = (listUrl, pageParam) => {
             mName,
             year,
             job,
-            score
+            score,
+            subjectId
           };
           movieArr.push(mListItem);
           spanTag += 2;
@@ -148,11 +155,22 @@ const start = async (url) => {
     });
     res.on('end', async () => {
       const $ = cheerio.load(html);
+      const personUuid = uuid();
       const personItem = getPersonInfo($);
-
+      try {
+        await spg.query(spg.SQL`
+          INSERT INTO persons 
+          (name, birthday, birth_place, occupation, movielist_url, image_url, uuid)
+          VALUES
+          (${personItem.name}, ${personItem.birthday}, ${personItem.birPlace}, ${personItem.occupation},
+          ${personItem.movielistUrl}, ${personItem.imgUrl}, ${personUuid})
+        `);
+      } catch (err) {
+        console.log(err);
+      }
       downloadPersonImg(personItem.name, personItem.imgUrl);
       const movieItem = await getMovieInfo(personItem.movieListUrl, url);
-      console.log(movieItem, movieItem.length);
+      console.log(movieItem.length);
     });
   });
 };

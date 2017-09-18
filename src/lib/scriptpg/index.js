@@ -1,5 +1,5 @@
-import pg from 'pg';
-import SQL from 'sql-template-strings';
+const pg = require('pg');
+const SQL = require('sql-template-strings');
 
 const pool = new pg.Pool({
   user: 'postgres',
@@ -14,12 +14,12 @@ pool.on('error', (err) => {
   throw new Error(err);
 });
 
-const conn = async () => {
+exports.conn = async () => {
   const client = await pool.connect();
   return client;
 };
 
-const query = async (sql) => {
+exports.query = async (sql) => {
   const client = await pool.connect();
   let res;
   try {
@@ -34,10 +34,4 @@ const query = async (sql) => {
   return res;
 };
 
-const pgquery = {
-  conn,
-  query,
-  SQL
-};
-
-export default pgquery;
+exports.SQL = SQL;
