@@ -2,11 +2,11 @@ import pg from 'pg';
 import SQL from 'sql-template-strings';
 
 const pool = new pg.Pool({
-  user: 'postgres',
+  user: 'leslie',
   host: 'db',
   database: 'movieisall',
-  password: 'ho123456',
-  port: 5434,
+  password: '111111',
+  port: 5432,
 });
 
 pool.on('error', (err) => {

@@ -3,7 +3,7 @@ const SQL = require('sql-template-strings');
 
 const pool = new pg.Pool({
   user: 'postgres',
-  host: 'db',
+  host: 'localhost',
   database: 'movieisall',
   password: 'ho123456',
   port: 5434,
