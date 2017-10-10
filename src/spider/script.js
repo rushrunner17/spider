@@ -185,8 +185,7 @@ const start = async (url) => {
         for (const item of movieItem) {
           await spg.query(spg.SQL`INSERT INTO movies (person_id, name, year, person_job, score, subject_id)
           VALUES
-          (${personId}, ${item.mName}, ${item.year}, ${item.job},
-             ${item.score}, ${item.subjectId})`);
+          (${personId}, ${item.mName}, ${item.year}, ${item.job}, ${item.score}, ${item.subjectId})`);
         }
         console.log('success!');
         return;
