@@ -5,14 +5,14 @@ const cheerio = require('cheerio');
 const uuid = require('uuid');
 const spg = require('../lib/scriptpg');
 
-const urlLink = 'https://movie.douban.com/celebrity/1054524/';
+const urlLink = 'https://movie.douban.com/celebrity/1003494/';
 
 const fetchPage = (url) => {
   start(url);
 };
 
 const downloadPersonImg = (name, addr) => {
-  request.get(addr).pipe(fs.createWriteStream(`../img/person/${name}.png`));
+  request.get(addr).pipe(fs.createWriteStream(`src/img/person/${name}.png`));
 };
 
 const getPageInfo = (listUrl, pageParam) => {
@@ -154,23 +154,44 @@ const start = async (url) => {
       html += chunk;
     });
     res.on('end', async () => {
-      const $ = cheerio.load(html);
-      const personUuid = uuid();
-      const personItem = getPersonInfo($);
       try {
+        const $ = cheerio.load(html);
+        const personUuid = uuid();
+        const personItem = getPersonInfo($);
+
         await spg.query(spg.SQL`
           INSERT INTO persons 
           (name, birthday, birth_place, occupation, movielist_url, image_url, uuid)
           VALUES
           (${personItem.name}, ${personItem.birthday}, ${personItem.birPlace}, ${personItem.occupation},
-          ${personItem.movielistUrl}, ${personItem.imgUrl}, ${personUuid})
+          ${personItem.movieListUrl}, ${personItem.imgUrl}, ${personUuid})
         `);
+        downloadPersonImg(personItem.name, personItem.imgUrl);
+
+        const movieItem = await getMovieInfo(personItem.movieListUrl, url);
+        console.log('The amount of movies: ', movieItem.length);
+        if (!movieItem) {
+          console.log('database error, no data!');
+        }
+        if (movieItem.length === 0) {
+          console.log('no movie item!');
+        }
+
+        const personData = await spg.query(spg.SQL`
+          SELECT id FROM persons WHERE uuid = ${personUuid}
+        `);
+        const personId = personData[0].id;
+
+        for (const item of movieItem) {
+          await spg.query(spg.SQL`INSERT INTO movies (person_id, name, year, person_job, score, subject_id)
+          VALUES
+          (${personId}, ${item.mName}, ${item.year}, ${item.job}, ${item.score}, ${item.subjectId})`);
+        }
+        console.log('success!');
+        return;
       } catch (err) {
         console.log(err);
       }
-      downloadPersonImg(personItem.name, personItem.imgUrl);
-      const movieItem = await getMovieInfo(personItem.movieListUrl, url);
-      console.log(movieItem.length);
     });
   });
 };

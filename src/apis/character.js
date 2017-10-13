@@ -2,26 +2,28 @@ import queryPg from '../lib/pg';
 
 const addPerson = async (req, res, next) => {
   const name = req.body.name;
-  const description = req.body.description;
+  // const description = req.body.description;
 
-  if (!name || !description) {
+  if (!name) {
     res.json('name and description are needed!');
     return;
   }
 
   try {
     await queryPg.query(queryPg.SQL`
-      INSERT INTO characters (name, description)
-      VALUES (${name}, ${description})
+      INSERT INTO persons 
+      (name, birthday, birth_place, occupation, movielist_url, image_url, uuid)
+      VALUES
+      (${name}, 'test', 'test', 'test', 'test', 'test', 'test')
     `);
   } catch (err) {
     res.json({ errmsg: 'query err!' });
+    console.log(err);
     return;
   }
 
   const respose = {
-    name: `${name}`,
-    description: `${description}`
+    name: `${name}`
   };
   res.json(200, respose);
 
